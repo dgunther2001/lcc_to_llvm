@@ -4,7 +4,7 @@ use std::fs::File;
 use inkwell::basic_block::BasicBlock;
 use inkwell::builder::Builder;
 use inkwell::types::{IntType, PointerType};
-use inkwell::values::FunctionValue;
+use inkwell::values::{FunctionValue, GlobalValue, PointerValue};
 use inkwell::{context::Context, module::Linkage};
 use inkwell::module::Module;
 use inkwell::{AddressSpace, OptimizationLevel};
@@ -18,6 +18,7 @@ pub struct IRGenUtil<'ctx> {
     pub i16_type:  IntType<'ctx>, 
     pub i16p_type: PointerType<'ctx>,
     pub i32_type:  IntType<'ctx>,
+    pub register_table: GlobalValue<'ctx>,
     pub microcode_function_map: HashMap<String, FunctionValue<'ctx>>
 }
 
@@ -29,9 +30,36 @@ impl<'ctx> IRGenUtil<'ctx> {
         let i16p_type = i16_type.ptr_type(AddressSpace::default());
         let i32_type = context.i32_type();
         let microcode_function_map = HashMap::new();
-        Self { context, module, builder, i16_type, i16p_type, i32_type, microcode_function_map }
-    }
 
+        let array_type = i16_type.array_type(8);
+        let zero_initializer = i16_type.const_int(0, false);
+        let initializer = i16_type.const_array(&vec![zero_initializer; 8]);
+        let register_table = module.add_global(array_type, None, "register_table");
+        register_table.set_initializer(&initializer);
+        register_table.set_linkage(Linkage::Internal);
+
+        Self { context, module, builder, i16_type, i16p_type, i32_type, microcode_function_map , register_table }
+    }
+pub fn get_register_ptr_const(&self, index: u32) -> PointerValue<'ctx> {
+    let zero = self.context.i32_type().const_zero();
+    let idx = self.context.i32_type().const_int(index as u64, false);
+
+    unsafe {
+        self.builder
+            .build_gep(
+                self.i16_type,
+                self.builder.build_gep(
+                    self.i16_type.array_type(8),
+                    self.register_table.as_pointer_value(),
+                    &[zero],
+                    "reg_base",
+                ).unwrap(),
+                &[idx],
+                "reg"
+            )
+            .unwrap()
+    }
+}
     pub fn cache_microcode(&mut self, name: String, function: FunctionValue<'ctx>) {
         self.microcode_function_map.insert(name, function);
     }
@@ -52,7 +80,7 @@ pub fn populate_module(lines: Vec<AsmLine>, ir: &mut IRGenUtil) -> () {
     let entry_function = ir.module.add_function("main", entry_function_type, None);
     let entry_block = ir.context.append_basic_block(entry_function, "entry");
     ir.builder.position_at_end(entry_block);
-
+    /* 
     let registers: Vec<inkwell::values::PointerValue<'_>> = (0..8)
         .map(|i| {
             let ptr = ir.builder.build_alloca(ir.i16_type, &format!("reg{i}")).unwrap();
@@ -60,6 +88,7 @@ pub fn populate_module(lines: Vec<AsmLine>, ir: &mut IRGenUtil) -> () {
             ptr
         })
         .collect();
+     */
         /* 
         .map(|_| ir.builder.build_alloca(ir.i16_type, "reg").unwrap())
         .collect();
@@ -69,7 +98,7 @@ pub fn populate_module(lines: Vec<AsmLine>, ir: &mut IRGenUtil) -> () {
     initialize_microcode_wrappers(ir, &entry_block);
 
     // generate llvm ir in the primary module from the lcc assembly
-    generate_ir_from_asm_lines(ir, lines, &registers);
+    generate_ir_from_asm_lines(ir, lines);
 
     // TEMORARY
     let _ = ir.builder.build_return(Some(&ir.i32_type.const_int(0, false)));
@@ -87,22 +116,32 @@ pub fn populate_module(lines: Vec<AsmLine>, ir: &mut IRGenUtil) -> () {
 
 
 
-fn generate_ir_from_asm_lines(ir: &IRGenUtil, lines: Vec<AsmLine>, registers: &Vec<inkwell::values::PointerValue<'_>>) -> () {
+fn generate_ir_from_asm_lines(ir: &mut IRGenUtil, lines: Vec<AsmLine>) -> () {
 
     for line in lines {
         match line {
             AsmLine::Add { dr, sr1, sr2 } => {
                 match sr2 {
                     RegOrImmOperand::Register(sr2_reg) => {
-                        ir.builder.build_call(ir.extract_microcode_function("add_sr2").unwrap(), &[registers[dr as usize].into(), registers[sr1 as usize].into(), registers[sr2_reg as usize].into()], "").unwrap();
+                        ir.builder.build_call(ir.extract_microcode_function("add_sr2").unwrap(), &[ir.get_register_ptr_const(dr as u32).into(), ir.get_register_ptr_const(sr1 as u32).into(), ir.get_register_ptr_const(sr2_reg as u32).into()], "").unwrap();
                     }
                     RegOrImmOperand::Immediate(imm5) => {
-                        ir.builder.build_call(ir.extract_microcode_function("add_imm5").unwrap(), &[registers[dr as usize].into(), registers[sr1 as usize].into(), ir.i16_type.const_int(imm5 as u64, true).into()], "").unwrap();
+                        ir.builder.build_call(ir.extract_microcode_function("add_imm5").unwrap(), &[ir.get_register_ptr_const(dr as u32).into(), ir.get_register_ptr_const(sr1 as u32).into(), ir.i16_type.const_int(imm5 as u64, true).into()], "").unwrap();
+                    }
+                }
+            }
+            AsmLine::Sub { dr, sr1, sr2 } => {
+                match sr2 {
+                    RegOrImmOperand::Register(sr2_reg) => {
+                        ir.builder.build_call(ir.extract_microcode_function("sub_sr2").unwrap(), &[ir.get_register_ptr_const(dr as u32).into(), ir.get_register_ptr_const(sr1 as u32).into(), ir.get_register_ptr_const(sr2_reg as u32).into()], "").unwrap();
+                    }
+                    RegOrImmOperand::Immediate(imm5) => {
+                        ir.builder.build_call(ir.extract_microcode_function("sub_imm5").unwrap(), &[ir.get_register_ptr_const(dr as u32).into(), ir.get_register_ptr_const(sr1 as u32).into(), ir.i16_type.const_int(imm5 as u64, true).into()], "").unwrap();
                     }
                 }
             }
             AsmLine::Dout { dr } => {
-                ir.builder.build_call(ir.extract_microcode_function("dout").unwrap(), &[registers[dr as usize].into()],"").unwrap();
+                ir.builder.build_call(ir.extract_microcode_function("dout").unwrap(), &[ir.get_register_ptr_const(dr as u32).into()],"").unwrap();
             }
             AsmLine::Nl { } => {
                 ir.builder.build_call(ir.extract_microcode_function("nl").unwrap(), &[],"").unwrap();
