@@ -1,3 +1,5 @@
 /target
 lcc_module.ll
+lcc_module.s
 lcc_module
+/output

@@ -25,7 +25,7 @@ fn main() {
             let mut ir_gen_utility = IRGenUtil::new(&context, "lcc_module");
             set_triple(&mut ir_gen_utility);
             populate_module(parse_tree, &mut ir_gen_utility);
-            write_module(&ir_gen_utility, "lcc_module.ll");
+            write_module(&ir_gen_utility, "output/lcc_module.ll");
 
         } else {
             eprintln!("Expected input value after --file arg")
