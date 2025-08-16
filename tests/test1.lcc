@@ -1,12 +1,18 @@
 
 ;ld r1 86745
-add r0 r0 25
-add r1 r0 r0
-sub r1 r1 6
+add r0 r0 8 ; r0 = 8
+add r1 r0 r0 ; r1 = 16
+sub r1 r1 6 ; r1 = 10
+mul r0 r0 ; r0 = 64
+
+add r2 r2 3 ; r2 = 3
+div r1 r2 ; r1 = 10/3 = 3
+
 dout r0
 nl
 dout r1
 nl
+
 ;div r1 r2
 ;sub r2 r3 11
 ;mul r3 r2 ;

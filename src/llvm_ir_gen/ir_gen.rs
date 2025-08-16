@@ -140,6 +140,12 @@ fn generate_ir_from_asm_lines(ir: &mut IRGenUtil, lines: Vec<AsmLine>) -> () {
                     }
                 }
             }
+            AsmLine::Mul { dr, sr } => {
+                ir.builder.build_call(ir.extract_microcode_function("mul").unwrap(), &[ir.get_register_ptr_const(dr as u32).into(), ir.get_register_ptr_const(sr as u32).into()],"").unwrap();
+            }
+            AsmLine::Div { dr, sr } => {
+                ir.builder.build_call(ir.extract_microcode_function("div").unwrap(), &[ir.get_register_ptr_const(dr as u32).into(), ir.get_register_ptr_const(sr as u32).into()],"").unwrap();
+            }
             AsmLine::Dout { dr } => {
                 ir.builder.build_call(ir.extract_microcode_function("dout").unwrap(), &[ir.get_register_ptr_const(dr as u32).into()],"").unwrap();
             }

@@ -102,3 +102,50 @@ pub fn sub_imm5(ir: &mut IRGenUtil) -> () {
 
     let _ = ir.builder.build_return(None);
 }
+
+pub fn mul(ir: &mut IRGenUtil) -> () {
+    let mul_fn_type = ir.context.void_type().fn_type(&[ir.i16p_type.into(), ir.i16p_type.into()], false);
+    let mul_fn = ir.module.add_function("mul", mul_fn_type, Some(Linkage::Internal));
+    let mul_entry_blk = ir.context.append_basic_block(mul_fn, "mul");
+    ir.builder.position_at_end(mul_entry_blk);
+
+    let dr = mul_fn.get_nth_param(0).unwrap().into_pointer_value();
+    let sr = mul_fn.get_nth_param(1).unwrap().into_pointer_value();
+
+    dr.set_name("dr");
+    sr.set_name("sr");
+
+    let dr_val = ir.builder.build_load(ir.i16_type, dr, "dr_val").unwrap().into_int_value();
+    let sr_val = ir.builder.build_load(ir.i16_type, sr, "sr_val").unwrap().into_int_value();
+    let result = ir.builder.build_int_mul(dr_val, sr_val, "res").unwrap();
+
+    ir.builder.build_store(dr, result).unwrap();
+
+    ir.cache_microcode("mul".to_string(), mul_fn);
+    let _ = ir.builder.build_return(None);
+}
+
+pub fn div(ir: &mut IRGenUtil) -> () {
+    let div_fn_type = ir.context.void_type().fn_type(&[ir.i16p_type.into(), ir.i16p_type.into()], false);
+    let div_fn = ir.module.add_function("div", div_fn_type, Some(Linkage::Internal));
+    let div_entry_blk = ir.context.append_basic_block(div_fn, "div");
+    ir.builder.position_at_end(div_entry_blk);
+
+    let dr = div_fn.get_nth_param(0).unwrap().into_pointer_value();
+    let sr = div_fn.get_nth_param(1).unwrap().into_pointer_value();
+
+    dr.set_name("dr");
+    sr.set_name("sr");
+
+    let dr_val = ir.builder.build_load(ir.i16_type, dr, "dr_val").unwrap().into_int_value();
+    let sr_val = ir.builder.build_load(ir.i16_type, sr, "sr_val").unwrap().into_int_value();
+
+    // GOTTA CHECK THIS????
+    let result = ir.builder.build_int_unsigned_div(dr_val, sr_val, "res").unwrap();
+
+    ir.builder.build_store(dr, result).unwrap();
+
+
+    ir.cache_microcode("div".to_string(), div_fn);
+    let _ = ir.builder.build_return(None);
+}
