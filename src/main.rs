@@ -2,7 +2,7 @@ use std::{env, fs::File, io::BufReader};
 
 use inkwell::context::Context;
 
-use crate::{llvm_ir_gen::ir_gen::{populate_module, set_triple, write_module, IRGenUtil}, parser::{asm_line_gen::generate_parse_tree, parser_defns::AsmLine}, tokenizer::tokens::Token};
+use crate::{llvm_ir_gen::{ir_gen::{populate_module, set_triple, write_module}, ir_gen_structures::IRGenUtil}, parser::{asm_line_gen::generate_parse_tree, parser_defns::AsmLine}, tokenizer::tokens::Token};
 
 
 mod definitions;

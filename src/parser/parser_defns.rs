@@ -7,11 +7,12 @@ pub enum AsmLine {
     Sub  { dr: Registers, sr1: Registers, sr2: RegOrImmOperand },
     Mul  { dr: Registers, sr: Registers},
     Div  { dr: Registers, sr: Registers},
-    Ld   { dr: Registers, loc: LabelOrOffset },
-    St   { dr: Registers, loc: LabelOrOffset },
+    //Ld   { dr: Registers, loc: LabelOrOffset },
+    //St   { dr: Registers, loc: LabelOrOffset },
     Dout { dr: Registers },
+    Din  { dr: Registers },
     Nl   { },
-    Invalid
+    //Invalid
 }
 
 #[derive(Debug)]

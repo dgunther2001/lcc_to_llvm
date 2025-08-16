@@ -7,11 +7,20 @@ mul r0 r0 ; r0 = 64
 
 add r2 r2 3 ; r2 = 3
 div r1 r2 ; r1 = 10/3 = 3
+sub r1 r1 7
 
 dout r0
 nl
 dout r1
 nl
+
+;din r3
+;dout r3
+;nl
+
+;sub r1 r1 4
+;dout r1
+;nl
 
 ;div r1 r2
 ;sub r2 r3 11

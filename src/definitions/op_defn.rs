@@ -40,8 +40,9 @@ pub enum Opcode {
     Uout,
     Hout,
     Aout,
-    Sout,
+    Sout, */
     Din,
+    /*
     Hin,
     Ain,
     Sin,
@@ -68,6 +69,7 @@ pub fn match_opcode(opcode: &str) -> Option<Opcode> {
         "mul"   => Some(Opcode::Mul),
         "div"   => Some(Opcode::Div),
         "dout"  => Some(Opcode::Dout),
+        "din"   => Some(Opcode::Din),
         "nl"    => Some(Opcode::Nl),
         _       => None
     }

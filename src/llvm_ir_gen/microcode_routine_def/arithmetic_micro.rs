@@ -1,151 +1,55 @@
-use inkwell::module::Linkage;
-
-use crate::llvm_ir_gen::ir_gen::IRGenUtil;
+use crate::llvm_ir_gen::{ir_gen_structures::IRGenUtil, microcode_routine_def::{create_void_return, declare_microcode, load_i16, store_i16, MicrocodeCallSignature}};
 
 pub fn add_sr2(ir: &mut IRGenUtil) -> () {
-    let add_fn_type = ir.context.void_type().fn_type(&[ir.i16p_type.into(), ir.i16p_type.into(), ir.i16p_type.into()], false);
-    let add_fn = ir.module.add_function("add_sr2", add_fn_type, Some(Linkage::Internal));
-    let add_entry_blk = ir.context.append_basic_block(add_fn, "add_sr2");
-    ir.builder.position_at_end(add_entry_blk);
-
-    let dr = add_fn.get_nth_param(0).unwrap().into_pointer_value();
-    let sr1 = add_fn.get_nth_param(1).unwrap().into_pointer_value();
-    let sr2 = add_fn.get_nth_param(2).unwrap().into_pointer_value();
-
-    dr.set_name("dr");
-    sr1.set_name("sr1");
-    sr2.set_name("sr2");
-
-    
-    let sr1_val = ir.builder.build_load(ir.i16_type, sr1, "sr1_val").unwrap().into_int_value();
-    let sr2_val = ir.builder.build_load(ir.i16_type, sr2, "sr2_val").unwrap().into_int_value();
-    let result = ir.builder.build_int_add(sr1_val, sr2_val, "res").unwrap();
-
-    ir.builder.build_store(dr, result).unwrap();
-
-    ir.cache_microcode("add_sr2".to_string(), add_fn);
-
-    let _ = ir.builder.build_return(None);
+    let (_, args) = declare_microcode(ir, "add_sr2", MicrocodeCallSignature::DrSrSr);
+    let sr1 = load_i16(ir, args.sr1.unwrap(), "sr1_val");
+    let sr2 = load_i16(ir, args.sr2.unwrap(), "sr2_val");
+    let res = ir.builder.build_int_add(sr1, sr2, "res").unwrap();
+    store_i16(ir, args.dr.unwrap(), res);
+    create_void_return(ir);
 }
 
 pub fn add_imm5(ir: &mut IRGenUtil) -> () {
-    let add_fn_type = ir.context.void_type().fn_type(&[ir.i16p_type.into(), ir.i16p_type.into(), ir.i16_type.into()], false);
-    let add_fn = ir.module.add_function("add_imm5", add_fn_type, Some(Linkage::Internal));
-    let add_entry_blk = ir.context.append_basic_block(add_fn, "add_imm5");
-    ir.builder.position_at_end(add_entry_blk);
-
-    let dr = add_fn.get_nth_param(0).unwrap().into_pointer_value();
-    let sr1 = add_fn.get_nth_param(1).unwrap().into_pointer_value();
-    let imm5 = add_fn.get_nth_param(2).unwrap().into_int_value();
-
-    dr.set_name("dr");
-    sr1.set_name("sr1");
-    imm5.set_name("imm5");
-
-    let sr1_val = ir.builder.build_load(ir.i16_type, sr1, "sr1_val").unwrap().into_int_value();
-    let result = ir.builder.build_int_add(sr1_val, imm5, "res").unwrap();
-
-    ir.builder.build_store(dr, result).unwrap();
-
-    ir.cache_microcode("add_imm5".to_string(), add_fn);
-
-    let _ = ir.builder.build_return(None);
+    let (_, args) = declare_microcode(ir, "add_imm5", MicrocodeCallSignature::DrSrImm5);
+    let sr = load_i16(ir, args.sr.unwrap(), "sr_val");
+    let imm5 = args.imm_or_offset.unwrap();
+    let res = ir.builder.build_int_add(sr, imm5, "res").unwrap();
+    store_i16(ir, args.dr.unwrap(), res);
+    create_void_return(ir);
 }
 
-
 pub fn sub_sr2(ir: &mut IRGenUtil) -> () {
-    let sub_fn_type = ir.context.void_type().fn_type(&[ir.i16p_type.into(), ir.i16p_type.into(), ir.i16p_type.into()], false);
-    let sub_fn = ir.module.add_function("sub_sr2", sub_fn_type, Some(Linkage::Internal));
-    let sub_entry_blk = ir.context.append_basic_block(sub_fn, "sub_sr2");
-    ir.builder.position_at_end(sub_entry_blk);
-
-    let dr = sub_fn.get_nth_param(0).unwrap().into_pointer_value();
-    let sr1 = sub_fn.get_nth_param(1).unwrap().into_pointer_value();
-    let sr2 = sub_fn.get_nth_param(2).unwrap().into_pointer_value();
-
-    dr.set_name("dr");
-    sr1.set_name("sr1");
-    sr2.set_name("sr2");
-
-    
-    let sr1_val = ir.builder.build_load(ir.i16_type, sr1, "sr1_val").unwrap().into_int_value();
-    let sr2_val = ir.builder.build_load(ir.i16_type, sr2, "sr2_val").unwrap().into_int_value();
-    let result = ir.builder.build_int_sub(sr1_val, sr2_val, "res").unwrap();
-
-    ir.builder.build_store(dr, result).unwrap();
-
-    ir.cache_microcode("sub_sr2".to_string(), sub_fn);
-
-    let _ = ir.builder.build_return(None);
+    let (_, args) = declare_microcode(ir, "sub_sr2", MicrocodeCallSignature::DrSrSr);
+    let sr1 = load_i16(ir, args.sr1.unwrap(), "sr1_val");
+    let sr2 = load_i16(ir, args.sr2.unwrap(), "sr2_val");
+    let res = ir.builder.build_int_sub(sr1, sr2, "res").unwrap();
+    store_i16(ir, args.dr.unwrap(), res);
+    create_void_return(ir);
 }
 
 pub fn sub_imm5(ir: &mut IRGenUtil) -> () {
-    let sub_fn_type = ir.context.void_type().fn_type(&[ir.i16p_type.into(), ir.i16p_type.into(), ir.i16_type.into()], false);
-    let sub_fn = ir.module.add_function("sub_imm5", sub_fn_type, Some(Linkage::Internal));
-    let sub_entry_blk = ir.context.append_basic_block(sub_fn, "sub_imm5");
-    ir.builder.position_at_end(sub_entry_blk);
-
-    let dr = sub_fn.get_nth_param(0).unwrap().into_pointer_value();
-    let sr1 = sub_fn.get_nth_param(1).unwrap().into_pointer_value();
-    let imm5 = sub_fn.get_nth_param(2).unwrap().into_int_value();
-
-    dr.set_name("dr");
-    sr1.set_name("sr1");
-    imm5.set_name("imm5");
-
-    let sr1_val = ir.builder.build_load(ir.i16_type, sr1, "sr1_val").unwrap().into_int_value();
-    let result = ir.builder.build_int_sub(sr1_val, imm5, "res").unwrap();
-
-    ir.builder.build_store(dr, result).unwrap();
-
-    ir.cache_microcode("sub_imm5".to_string(), sub_fn);
-
-    let _ = ir.builder.build_return(None);
+    let (_, args) = declare_microcode(ir, "sub_imm5", MicrocodeCallSignature::DrSrImm5);
+    let sr = load_i16(ir, args.sr.unwrap(), "sr_val");
+    let imm5 = args.imm_or_offset.unwrap();
+    let res = ir.builder.build_int_sub(sr, imm5, "res").unwrap();
+    store_i16(ir, args.dr.unwrap(), res);
+    create_void_return(ir);
 }
 
 pub fn mul(ir: &mut IRGenUtil) -> () {
-    let mul_fn_type = ir.context.void_type().fn_type(&[ir.i16p_type.into(), ir.i16p_type.into()], false);
-    let mul_fn = ir.module.add_function("mul", mul_fn_type, Some(Linkage::Internal));
-    let mul_entry_blk = ir.context.append_basic_block(mul_fn, "mul");
-    ir.builder.position_at_end(mul_entry_blk);
-
-    let dr = mul_fn.get_nth_param(0).unwrap().into_pointer_value();
-    let sr = mul_fn.get_nth_param(1).unwrap().into_pointer_value();
-
-    dr.set_name("dr");
-    sr.set_name("sr");
-
-    let dr_val = ir.builder.build_load(ir.i16_type, dr, "dr_val").unwrap().into_int_value();
-    let sr_val = ir.builder.build_load(ir.i16_type, sr, "sr_val").unwrap().into_int_value();
-    let result = ir.builder.build_int_mul(dr_val, sr_val, "res").unwrap();
-
-    ir.builder.build_store(dr, result).unwrap();
-
-    ir.cache_microcode("mul".to_string(), mul_fn);
-    let _ = ir.builder.build_return(None);
+    let (_, args) = declare_microcode(ir, "mul", MicrocodeCallSignature::DrSr);
+    let dr = load_i16(ir, args.dr.unwrap(), "dr_val");
+    let sr = load_i16(ir, args.sr.unwrap(), "sr_val");
+    let res = ir.builder.build_int_mul(dr, sr, "res").unwrap();
+    store_i16(ir, args.dr.unwrap(), res);
+    create_void_return(ir);
 }
 
 pub fn div(ir: &mut IRGenUtil) -> () {
-    let div_fn_type = ir.context.void_type().fn_type(&[ir.i16p_type.into(), ir.i16p_type.into()], false);
-    let div_fn = ir.module.add_function("div", div_fn_type, Some(Linkage::Internal));
-    let div_entry_blk = ir.context.append_basic_block(div_fn, "div");
-    ir.builder.position_at_end(div_entry_blk);
-
-    let dr = div_fn.get_nth_param(0).unwrap().into_pointer_value();
-    let sr = div_fn.get_nth_param(1).unwrap().into_pointer_value();
-
-    dr.set_name("dr");
-    sr.set_name("sr");
-
-    let dr_val = ir.builder.build_load(ir.i16_type, dr, "dr_val").unwrap().into_int_value();
-    let sr_val = ir.builder.build_load(ir.i16_type, sr, "sr_val").unwrap().into_int_value();
-
-    // GOTTA CHECK THIS????
-    let result = ir.builder.build_int_unsigned_div(dr_val, sr_val, "res").unwrap();
-
-    ir.builder.build_store(dr, result).unwrap();
-
-
-    ir.cache_microcode("div".to_string(), div_fn);
-    let _ = ir.builder.build_return(None);
+    let (_, args) = declare_microcode(ir, "div", MicrocodeCallSignature::DrSr);
+    let dr = load_i16(ir, args.dr.unwrap(), "dr_val");
+    let sr = load_i16(ir, args.sr.unwrap(), "sr_val");
+    let res = ir.builder.build_int_unsigned_div(dr, sr, "res").unwrap();
+    store_i16(ir, args.dr.unwrap(), res);
+    create_void_return(ir);
 }

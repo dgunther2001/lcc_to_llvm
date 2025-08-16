@@ -1,4 +1,4 @@
-use crate::{definitions::{self, op_defn::Opcode, reg_defn::match_string_to_reg}, parser::parser_defns::{AsmLine, RegOrImmOperand}, tokenizer::tokens::Token};
+use crate::{definitions::{op_defn::Opcode}, parser::parser_defns::{AsmLine, RegOrImmOperand}, tokenizer::tokens::Token};
 
 
 
@@ -8,7 +8,7 @@ pub fn generate_parse_tree(tokens: &Vec<Vec<Token>>) -> Vec<AsmLine> {
     for line in tokens {
         if let Some(first_token) = line.get(0) {
             match first_token {
-                Token::Opcode(opc) => {
+                Token::Opcode(_) => {
                     if let Some(asm_line) = parse_opcodes(line) {
                         parsed_lines.push(asm_line)
                     }
@@ -27,7 +27,7 @@ pub fn generate_parse_tree(tokens: &Vec<Vec<Token>>) -> Vec<AsmLine> {
 fn parse_opcodes(tokens: &Vec<Token>) -> Option<AsmLine> {
     match tokens.get(0) {
         Some(Token::Opcode(Opcode::Add)) | Some(Token::Opcode(Opcode::Sub)) | Some(Token::Opcode(Opcode::Mul)) | Some(Token::Opcode(Opcode::Div)) => parse_arithmetic(tokens),
-        Some(Token::Opcode(Opcode::Dout)) | Some(Token::Opcode(Opcode::Nl)) => parse_io(tokens),
+        Some(Token::Opcode(Opcode::Dout)) | Some(Token::Opcode(Opcode::Nl)) | Some(Token::Opcode(Opcode::Din))  => parse_io(tokens),
         //Ld  => (),
         //St  => (),
         _            => None
@@ -109,6 +109,9 @@ fn parse_io(tokens: &Vec<Token>) -> Option<AsmLine> {
         }
         [Token::Opcode(Opcode::Nl)] => {
             Some(AsmLine::Nl {  })
+        }
+        [Token::Opcode(Opcode::Din), Token::Register(reg)] => {
+            Some(AsmLine::Din { dr: *reg })
         }
         _ => None
     }
