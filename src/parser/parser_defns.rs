@@ -7,6 +7,11 @@ pub enum AsmLine {
     Sub  { dr: Registers, sr1: Registers, sr2: RegOrImmOperand },
     Mul  { dr: Registers, sr: Registers},
     Div  { dr: Registers, sr: Registers},
+    
+    And  { dr: Registers, sr1: Registers, sr2: RegOrImmOperand },
+    Or   { dr: Registers, sr: Registers},
+    Xor  { dr: Registers, sr: Registers},
+    Not  { dr: Registers, sr: Registers},
     //Ld   { dr: Registers, loc: LabelOrOffset },
     //St   { dr: Registers, loc: LabelOrOffset },
     Dout { dr: Registers },

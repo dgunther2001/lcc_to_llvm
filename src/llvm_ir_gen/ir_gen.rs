@@ -66,6 +66,28 @@ fn generate_ir_from_asm_lines(ir: &mut IRGenUtil, lines: Vec<AsmLine>) -> () {
             AsmLine::Div { dr, sr } => {
                 ir.builder.build_call(ir.extract_microcode_function("div").unwrap(), &[ir.get_register_ptr_const(dr as u32).into(), ir.get_register_ptr_const(sr as u32).into()],"").unwrap();
             }
+            
+
+            AsmLine::And { dr, sr1, sr2 } => {
+                match sr2 {
+                    RegOrImmOperand::Register(sr2_reg) => {
+                        ir.builder.build_call(ir.extract_microcode_function("and_sr2").unwrap(), &[ir.get_register_ptr_const(dr as u32).into(), ir.get_register_ptr_const(sr1 as u32).into(), ir.get_register_ptr_const(sr2_reg as u32).into()], "").unwrap();
+                    }
+                    RegOrImmOperand::Immediate(imm5) => {
+                        ir.builder.build_call(ir.extract_microcode_function("and_imm5").unwrap(), &[ir.get_register_ptr_const(dr as u32).into(), ir.get_register_ptr_const(sr1 as u32).into(), ir.i16_type.const_int(imm5 as u64, true).into()], "").unwrap();
+                    }
+                }
+            }
+            AsmLine::Or { dr, sr } => {
+                ir.builder.build_call(ir.extract_microcode_function("or").unwrap(), &[ir.get_register_ptr_const(dr as u32).into(), ir.get_register_ptr_const(sr as u32).into()],"").unwrap();
+            }
+            AsmLine::Xor { dr, sr } => {
+                ir.builder.build_call(ir.extract_microcode_function("xor").unwrap(), &[ir.get_register_ptr_const(dr as u32).into(), ir.get_register_ptr_const(sr as u32).into()],"").unwrap();
+            }
+            AsmLine::Not { dr, sr } => {
+                ir.builder.build_call(ir.extract_microcode_function("not").unwrap(), &[ir.get_register_ptr_const(dr as u32).into(), ir.get_register_ptr_const(sr as u32).into()],"").unwrap();
+            }
+
             AsmLine::Dout { dr } => {
                 ir.builder.build_call(ir.extract_microcode_function("dout").unwrap(), &[ir.get_register_ptr_const(dr as u32).into()],"").unwrap();
             }

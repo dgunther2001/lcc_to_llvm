@@ -18,9 +18,9 @@ fn main() {
         if let Some(file_path) = args.get(index + 1) {
             let file = File::open(file_path).expect("Failed to open input file");
             let tokens: Vec<Vec<Token>> = tokenizer::lexer::tokenize_file(BufReader::new(file));
-            println!("Tokens: {:?}", tokens);
+            //println!("Tokens: {:?}", tokens);
             let parse_tree: Vec<AsmLine> = generate_parse_tree(&tokens);
-            println!("Parse Tree: {:?}", parse_tree);
+            //println!("Parse Tree: {:?}", parse_tree);
             let context = Context::create();
             let mut ir_gen_utility = IRGenUtil::new(&context, "lcc_module");
             set_triple(&mut ir_gen_utility);

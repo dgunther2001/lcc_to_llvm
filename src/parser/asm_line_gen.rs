@@ -1,4 +1,4 @@
-use crate::{definitions::{op_defn::Opcode}, parser::parser_defns::{AsmLine, RegOrImmOperand}, tokenizer::tokens::Token};
+use crate::{definitions::op_defn::Opcode, parser::{self, parser_defns::{AsmLine, RegOrImmOperand}}, tokenizer::tokens::Token};
 
 
 
@@ -28,6 +28,7 @@ fn parse_opcodes(tokens: &Vec<Token>) -> Option<AsmLine> {
     match tokens.get(0) {
         Some(Token::Opcode(Opcode::Add)) | Some(Token::Opcode(Opcode::Sub)) | Some(Token::Opcode(Opcode::Mul)) | Some(Token::Opcode(Opcode::Div)) => parse_arithmetic(tokens),
         Some(Token::Opcode(Opcode::Dout)) | Some(Token::Opcode(Opcode::Nl)) | Some(Token::Opcode(Opcode::Din))  => parse_io(tokens),
+        Some(Token::Opcode(Opcode::And)) | Some(Token::Opcode(Opcode::Or)) | Some(Token::Opcode(Opcode::Xor)) | Some(Token::Opcode(Opcode::Not)) => parse_logic(tokens),
         //Ld  => (),
         //St  => (),
         _            => None
@@ -64,7 +65,7 @@ fn parse_arithmetic(tokens: &Vec<Token>) -> Option<AsmLine> {
             Some(Token::Register(sr1)),
             Some(Token::Numeric(imm5))    
         ) => {
-            if (*imm5 < 32 && *imm5 >=0) {
+            if *imm5 < 16 && *imm5 >= -15 {
                 let instruction_type = match opc {
                     Opcode::Add => AsmLine::Add {
                         dr: *dr,
@@ -112,6 +113,27 @@ fn parse_io(tokens: &Vec<Token>) -> Option<AsmLine> {
         }
         [Token::Opcode(Opcode::Din), Token::Register(reg)] => {
             Some(AsmLine::Din { dr: *reg })
+        }
+        _ => None
+    }
+}
+
+fn parse_logic(tokens: &Vec<Token>) -> Option<AsmLine> {
+    match tokens.as_slice() {
+        [Token::Opcode(Opcode::And), Token::Register(dr), Token::Register(sr1), Token::Register(sr2)] => {
+            Some(AsmLine::And { dr: *dr, sr1: *sr1, sr2: parser::parser_defns::RegOrImmOperand::Register(*sr2) })
+        }
+        [Token::Opcode(Opcode::And), Token::Register(dr), Token::Register(sr1), Token::Numeric(imm5)] => {
+            Some(AsmLine::And { dr: *dr, sr1: *sr1, sr2: parser::parser_defns::RegOrImmOperand::Immediate(*imm5) })
+        }
+        [Token::Opcode(Opcode::Or), Token::Register(dr), Token::Register(sr)] => {
+            Some(AsmLine::Or { dr: *dr, sr: *sr })
+        }
+        [Token::Opcode(Opcode::Xor), Token::Register(dr), Token::Register(sr)] => {
+            Some(AsmLine::Xor { dr: *dr, sr: *sr })
+        }
+        [Token::Opcode(Opcode::Not), Token::Register(dr), Token::Register(sr)] => {
+            Some(AsmLine::Not { dr: *dr, sr: *sr })
         }
         _ => None
     }

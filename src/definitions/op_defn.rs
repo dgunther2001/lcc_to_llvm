@@ -4,12 +4,15 @@ pub enum Opcode {
     Ld,
     St, /*
     Bl,
-    Blr,
+    Blr, */
     And,
+    /* 
     Ldr,
     Str,
-    Cmp,
+    Cmp, 
+    */
     Not,
+    /*
     Push, 
     Pop,
     Srl,
@@ -21,9 +24,10 @@ pub enum Opcode {
     Mul,
     Div,
     /* 
-    Rem,
+    Rem, */
     Or,
     Xor,
+    /* 
     Mvr,
     Sext,
     */
@@ -68,6 +72,10 @@ pub fn match_opcode(opcode: &str) -> Option<Opcode> {
         "sub"   => Some(Opcode::Sub),
         "mul"   => Some(Opcode::Mul),
         "div"   => Some(Opcode::Div),
+        "and"   => Some(Opcode::And),
+        "or"    => Some(Opcode::Or),
+        "xor"   => Some(Opcode::Xor),
+        "not"   => Some(Opcode::Not),
         "dout"  => Some(Opcode::Dout),
         "din"   => Some(Opcode::Din),
         "nl"    => Some(Opcode::Nl),
