@@ -97,7 +97,7 @@ fn generate_ir_from_asm_lines(ir: &mut IRGenUtil, lines: Vec<AsmLine>) -> () {
             AsmLine::Din { dr } => {
                 ir.builder.build_call(ir.extract_microcode_function("din").unwrap(), &[ir.get_register_ptr_const(dr as u32).into()],"").unwrap();
             }
-            _ => todo!()
+            _ => unreachable!()
         }
     }
 }

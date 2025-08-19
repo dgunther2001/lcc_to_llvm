@@ -13,7 +13,7 @@ pub fn generate_parse_tree(tokens: &Vec<Vec<Token>>) -> Vec<AsmLine> {
                         parsed_lines.push(asm_line)
                     }
                 }
-                Token::Label(lbl) => {
+                Token::Label(_lbl) => {
 
                 }
                 _ => eprintln!("Tokenization failed on: {:?}", line)
