@@ -6,6 +6,12 @@ mod logic_micro_tests {
                      r#"add r0 r0 6
                         add r1 r1 9
                         and r0 r0 r1"#, 0);
+    
+    smoke_test_case!(single_and_imm5,
+                     r#"add r0 r0 3
+                        add r1 r1 14
+                        and r0 r0 r1"#, 2
+    );
 
     smoke_test_case!(single_or, 
                      r#"add r0 r0 6
