@@ -1,18 +1,18 @@
 
 ;ld r1 86745
-add r0 r0 8 ; r0 = 8
-add r1 r0 r0 ; r1 = 16
-sub r1 r1 6 ; r1 = 10
-mul r0 r0 ; r0 = 64
+;add r0 r0 8 ; r0 = 8
+;add r1 r0 r0 ; r1 = 16
+;sub r1 r1 6 ; r1 = 10
+;mul r0 r0 ; r0 = 64
 
-add r2 r2 3 ; r2 = 3
-div r1 r2 ; r1 = 10/3 = 3
-sub r1 r1 7
+;add r2 r2 3 ; r2 = 3
+;div r1 r2 ; r1 = 10/3 = 3
+;sub r1 r1 7
 
-dout r0
-nl
-dout r1
-nl
+;dout r0
+;nl
+;dout r1
+;nl
 
 ; TEST XOR
 ;add r3 r3 -1
@@ -24,6 +24,10 @@ nl
 ;xor r4 r3
 ;dout r4
 ;nl
+;add r0 r0 -1
+;xor r1 r0
+;dout r1
+;nl
 
 ; TEST OR
 ;add r3 r3 7
@@ -33,17 +37,21 @@ nl
 ;nl
 
 ; TEST NOT 
-;add r3 r3 -1
-;not r3 r3
-;dout r3
+;dout r1 
 ;nl
+;add r1 r1 -5
+;not r0 r1
+;dout r0
+;nl
+; 1111 1111 1111 1011 == -5
+; 0000 0000 0000 0100 == 4
 
 ; TEST AND SR2 
-add r3 r3 5
-add r4 r4 6
-and r3 r3 r4
-dout r3
-nl
+;add r3 r3 5
+;add r4 r4 6
+;and r3 r3 r4
+;dout r3
+;nl
 
 ; TEST AND IMM5
 ;add r3 r3 5

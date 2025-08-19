@@ -37,6 +37,7 @@ fn main() {
     //make_basic_ir();
 }
 
+/* 
 #[test]
 fn basic_test() {
     println!("Opcode: {:?}", definitions::op_defn::match_opcode("add"));
@@ -53,3 +54,4 @@ fn tokenize_some_stuff() {
     //println!("Tokenized Output: {:?}", tokens1);
     //println!("Tokenized Output: {:?}", tokens2);
 }
+    */

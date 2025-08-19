@@ -11,12 +11,16 @@ pub fn tokenize_file(file_reader: impl BufRead) -> Vec<Vec<Token>> {
             tokenize_line(&line, &mut tokens);
         }
     }
-
     tokens
 }
 
-
-
+pub fn tokenize_text(text: &str) -> Vec<Vec<Token>> {
+    let mut tokens: Vec<Vec<Token>> = Vec::new();
+    for line in text.split("\n") {
+        tokenize_line(line, &mut tokens);
+    }
+    tokens
+}
 
 pub fn tokenize_line(line:  &str, tokens: &mut Vec<Vec<Token>>) -> () {
     let mut new_line_tokens: Vec<Token> = Vec::new();
